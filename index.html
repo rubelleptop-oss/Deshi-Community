@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Deshi Community – যুক্তরাজ্যের বাংলাদেশি কমিউনিটি</title>
+<meta name="description" content="যুক্তরাজ্যের বাংলাদেশিদের জন্য চাকরি, বাসা ভাড়া, ব্যবসা, সেবা ও ইভেন্টের বিজ্ঞাপন প্ল্যাটফর্ম।">
+<meta name="theme-color" content="#006a4e">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Deshi Community – যুক্তরাজ্যের বাংলাদেশি কমিউনিটি">
+<meta property="og:description" content="চাকরি, বাসা ভাড়া, ব্যবসা, সেবা ও ইভেন্ট, সব এক জায়গায়। বিনামূল্যে বিজ্ঞাপন দিন।">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏡</text></svg>">
+<!--
+Supabase SQL (SQL Editor-এ একবার চালান):
+create table ads (id bigint generated always as identity primary key, kind text check (kind in ('employer','seeker')), category text, title text, city text, price text, details text, contact text, approved boolean default false, pinned boolean default false, created_at timestamptz default now());
+alter table ads enable row level security;
+create policy "read approved" on ads for select using (approved);
+create policy "anyone can post" on ads for insert with check (approved = false and pinned = false);
+-->
+<style>
+:root{--bg:#f4f6f4;--card:#fff;--text:#16241d;--muted:#66756c;--green:#006a4e;--green2:#004d38;--red:#e63946;--orange:#f08a24;--line:#e3e8e4;--soft:#e8f3ee;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1511;--card:#17231d;--text:#eef4f0;--muted:#9fb1a7;--green:#2fae86;--green2:#1f8c69;--line:#26362e;--soft:#18302a}}
+:root[data-theme="dark"]{--bg:#0e1511;--card:#17231d;--text:#eef4f0;--muted:#9fb1a7;--green:#2fae86;--green2:#1f8c69;--line:#26362e;--soft:#18302a}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Noto Sans Bengali","Kohinoor Bangla","Nirmala UI",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.55}
+.wrap{max-width:980px;margin:0 auto;padding:0 14px}
+button,input,select,textarea{font:inherit;color:inherit}
+.promo{background:#2b2f2d;color:#fff}
+.promo .wrap{display:flex;align-items:center;gap:10px;padding-top:8px;padding-bottom:8px}
+.mark{width:34px;height:34px;border-radius:9px;background:var(--red);display:grid;place-items:center;font-weight:800;color:#fff;flex:none}
+.promo small{display:block;opacity:.8;font-size:.78rem}
+.promo b{font-size:.95rem}
+.chip{margin-left:auto;background:var(--red);padding:6px 12px;border-radius:8px;font-size:.8rem;font-weight:700;white-space:nowrap}
+.hd{background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.hd .wrap{display:flex;gap:10px;align-items:center;padding-top:10px;padding-bottom:10px}
+.logo{font-weight:800;font-size:1.1rem;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.dot{width:13px;height:13px;border-radius:50%;background:var(--red);box-shadow:0 0 0 5px var(--green)}
+.hd input{flex:1;min-width:0;padding:10px 14px;border-radius:99px;border:1px solid var(--line);background:var(--bg)}
+.btn{padding:11px 18px;border-radius:10px;border:0;background:var(--red);color:#fff;font-weight:700;cursor:pointer;white-space:nowrap;text-decoration:none;display:inline-block}
+.btn.g{background:var(--green)}
+.btn.o{background:transparent;border:2px solid var(--green);color:var(--green)}
+.hero{background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border-radius:18px;padding:22px 18px;margin:14px 0}
+.hero h1{margin:0 0 6px;font-size:clamp(1.4rem,5vw,2.2rem);line-height:1.3}
+.hero p{margin:0 0 14px;opacity:.92}
+.stats{display:flex;gap:18px;flex-wrap:wrap;font-size:.9rem}
+.stats b{font-size:1.2rem;display:block}
+.cats{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:0 0 14px}
+@media(max-width:560px){.cats{grid-template-columns:repeat(4,1fr)}}
+.cat{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:10px 2px;text-align:center;cursor:pointer;font-size:.8rem;font-weight:600}
+.cat span{display:block;font-size:1.5rem}
+.cat.on{border-color:var(--green);background:var(--soft);color:var(--green)}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.tab{padding:13px 6px;border-radius:12px;border:2px solid var(--green);background:var(--card);color:var(--green);font-weight:700;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--green);color:#fff}
+.filters{display:flex;gap:8px;margin-bottom:12px;align-items:center}
+select,input,textarea{padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);width:100%}
+.filters select{flex:1}
+.rc{color:var(--muted);font-size:.85rem;white-space:nowrap}
+.banner{border-radius:16px;padding:18px;margin-bottom:12px;background:linear-gradient(120deg,#f6b73c,var(--orange));color:#2a1a00;display:flex;align-items:center;gap:12px;justify-content:space-between}
+.banner h3{margin:0 0 4px;font-size:1.3rem}
+.banner p{margin:0;font-size:.88rem}
+.banner .big{font-size:3rem}
+.ad{display:flex;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px;cursor:pointer}
+.ad:active{background:var(--soft)}
+.av{width:54px;height:54px;border-radius:12px;background:var(--soft);display:grid;place-items:center;font-size:1.7rem;flex:none}
+.ad .m{flex:1;min-width:0}
+.ad h3{margin:0 0 4px;font-size:1rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tags{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:.78rem;color:var(--muted)}
+.tag{background:var(--soft);color:var(--green);border-radius:6px;padding:1px 8px;font-weight:700}
+.pin{background:var(--red);color:#fff;border-radius:6px;padding:1px 8px;font-weight:700}
+.price{color:var(--orange);font-weight:800}
+.ago{margin-left:auto}
+.empty{text-align:center;color:var(--muted);padding:30px 0}
+.more{display:block;margin:6px auto 18px}
+.sec{padding:22px 0}
+.sec h2{margin:0 0 12px;font-size:1.3rem}
+.g3{display:grid;gap:10px}
+@media(min-width:700px){.g3{grid-template-columns:repeat(3,1fr)}}
+.box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.box b{display:block;margin-bottom:4px}
+.box p{margin:0;color:var(--muted);font-size:.92rem}
+.num{width:30px;height:30px;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;font-weight:800;margin-bottom:8px}
+.safe{background:var(--soft);border-radius:14px;padding:14px;font-size:.92rem}
+.demo{background:#fff3cd;color:#664d03;border-radius:10px;padding:8px 12px;font-size:.85rem;margin-bottom:12px}
+footer{background:#1d2622;color:#c9d6cf;padding:24px 0 90px;font-size:.88rem}
+footer a{color:#fff}
+.fab{position:fixed;right:16px;bottom:calc(18px + env(safe-area-inset-bottom,0px));width:58px;height:58px;border-radius:50%;border:0;background:var(--orange);color:#fff;font-size:1.5rem;box-shadow:0 6px 18px #0004;cursor:pointer;z-index:6}
+.fab.wa{bottom:calc(88px + env(safe-area-inset-bottom,0px));background:#25d366;display:grid;place-items:center;text-decoration:none}
+a.banner{text-decoration:none}
+details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:8px}
+summary{font-weight:700;cursor:pointer}
+details p{margin:8px 0 0;color:var(--muted);font-size:.92rem}
+dialog{border:0;border-radius:18px;padding:0;width:calc(100% - 24px);max-width:520px;max-height:90vh;background:var(--card);color:var(--text)}
+dialog::backdrop{background:#0009}
+.dp{padding:16px}
+.dp h2{margin:0 0 8px;font-size:1.2rem}
+.x{float:right;background:var(--bg);border:0;border-radius:50%;width:34px;height:34px;cursor:pointer}
+label{display:block;font-weight:700;font-size:.88rem;margin:10px 0 4px}
+textarea{min-height:90px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.links{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.det{white-space:pre-wrap;word-break:break-word;margin:10px 0}
+.hp{position:absolute;left:-9999px;height:0;overflow:hidden}
+#msg{margin-top:8px;font-weight:700}
+</style>
+</head>
+<body>
+<div class="promo"><div class="wrap"><div class="mark">দে</div><div><b>Deshi Community</b><small>প্রবাসী বাংলাদেশি লাইফ প্ল্যাটফর্ম</small></div><div class="chip">অ্যাপ শীঘ্রই</div></div></div>
+<div class="hd"><div class="wrap">
+  <div class="logo"><span class="dot"></span>Deshi</div>
+  <input id="q" type="search" placeholder="🔍 চাকরি, বাসা, সেবা খুঁজুন">
+  <button class="btn" id="post">＋ বিজ্ঞাপন</button>
+</div></div>
+
+<main class="wrap">
+<div class="hero">
+  <h1>যুক্তরাজ্যে বাংলাদেশিদের নিজস্ব ঠিকানা</h1>
+  <p>চাকরি, বাসা ভাড়া, ব্যবসা, সেবা ও ইভেন্ট, সব এক জায়গায়।</p>
+  <div class="stats"><div><b id="cnt">০</b>সক্রিয় বিজ্ঞাপন</div><div><b>১২+</b>শহর</div><div><b>বিনামূল্যে</b>বিজ্ঞাপন</div></div>
+</div>
+<div class="demo" id="demo" hidden>ডেমো মোড: নমুনা বিজ্ঞাপন দেখানো হচ্ছে, আর আপনার দেওয়া বিজ্ঞাপন শুধু আপনার ফোনে সেভ হবে।</div>
+
+<div class="cats" id="cats"></div>
+
+<div class="tabs" role="tablist">
+  <button class="tab" role="tab" id="t-employer" aria-selected="true">👔 মালিক / নিয়োগকর্তা</button>
+  <button class="tab" role="tab" id="t-seeker" aria-selected="false">🙋 কাজ খুঁজছেন</button>
+</div>
+<div class="filters"><select id="city" aria-label="শহর"></select><span class="rc" id="rc"></span></div>
+
+<a class="banner" href="https://wa.me/393512463780" target="_blank" rel="noopener"><div><h3>আপনার ব্যবসার বিজ্ঞাপন এখানে</h3><p>হাজারো বাংলাদেশির কাছে পৌঁছান। WhatsApp-এ যোগাযোগ করুন।</p></div><div class="big">📣</div></a>
+
+<div id="list"></div>
+<button class="btn o more" id="more" hidden>আরও দেখুন</button>
+
+<section class="sec"><h2>কীভাবে কাজ করে</h2>
+<div class="g3">
+  <div class="box"><div class="num">1</div><b>বিজ্ঞাপন দিন</b><p>"＋ বিজ্ঞাপন" চেপে ফর্ম পূরণ করুন। মালিক বা কাজ প্রার্থী, দুজনেই দিতে পারবেন।</p></div>
+  <div class="box"><div class="num">2</div><b>যাচাই হবে</b><p>প্রতারণা ঠেকাতে প্রতিটি বিজ্ঞাপন আমরা দেখে নিই।</p></div>
+  <div class="box"><div class="num">3</div><b>সরাসরি যোগাযোগ</b><p>WhatsApp, ফোন বা ইমেইলে সরাসরি কথা বলুন।</p></div>
+</div></section>
+
+<section class="sec"><h2>কেন Deshi Community</h2>
+<div class="g3">
+  <div class="box"><b>🇧🇩 নিজেদের ভাষায়</b><p>বাংলায় সহজে বিজ্ঞাপন দিন ও খুঁজুন।</p></div>
+  <div class="box"><b>📍 শহর ধরে খোঁজা</b><p>লন্ডন থেকে গ্লাসগো, আপনার এলাকার বিজ্ঞাপন দেখুন।</p></div>
+  <div class="box"><b>🛡️ নিরাপদ পরিবেশ</b><p>যাচাই করা বিজ্ঞাপন, ভুয়া অফার থেকে সুরক্ষা।</p></div>
+</div></section>
+
+<section class="sec"><h2>সাধারণ প্রশ্ন</h2>
+<details><summary>বিজ্ঞাপন দিতে কি টাকা লাগে?</summary><p>না, এখন বিজ্ঞাপন দেওয়া সম্পূর্ণ বিনামূল্যে।</p></details>
+<details><summary>বিজ্ঞাপন কখন প্রকাশ হয়?</summary><p>প্রতারণা ঠেকাতে প্রতিটি বিজ্ঞাপন যাচাইয়ের পর প্রকাশ করা হয়।</p></details>
+<details><summary>আমার তথ্য কি সবাই দেখতে পাবে?</summary><p>বিজ্ঞাপনে আপনি যে ফোন নম্বর বা ইমেইল দেন, শুধু সেটাই সবাই দেখতে পাবে।</p></details>
+<details><summary>মালিক ও কাজ প্রার্থী, দুজনেই কি বিজ্ঞাপন দিতে পারবে?</summary><p>হ্যাঁ। দুজনের জন্য আলাদা সেকশন আছে, ফর্মে নিজের ধরন বেছে নিন।</p></details>
+</section>
+
+<section class="sec" id="contact"><h2>যোগাযোগ</h2>
+<div class="box"><p>বিজ্ঞাপন, পরামর্শ বা সহায়তার জন্য আমাদের সঙ্গে কথা বলুন।</p>
+<div class="links"><a class="btn g" href="https://wa.me/393512463780" target="_blank" rel="noopener">💬 WhatsApp: +39 351 246 3780</a><a class="btn o" href="mailto:rubelpixel97@gmail.com">✉️ rubelpixel97@gmail.com</a></div></div></section>
+
+<section class="sec"><div class="safe"><b>🛡️ নিরাপত্তা টিপস:</b> কাজের আগে টাকা চাইলে সাবধান হন। লিখিত চুক্তি ছাড়া কাজ শুরু করবেন না। নিয়োগকর্তার পরিচয় যাচাই করুন। যুক্তরাজ্যে কাজের বৈধ অধিকার (right to work) যাচাই করা নিয়োগকর্তার দায়িত্ব।</div></section>
+</main>
+
+<footer><div class="wrap">
+  <b>Deshi Community</b><br>যুক্তরাজ্যের বাংলাদেশি কমিউনিটির জন্য, কমিউনিটির মানুষের তৈরি।<br><br>
+  যোগাযোগ: <a href="https://wa.me/393512463780" target="_blank" rel="noopener">WhatsApp +39 351 246 3780</a> · <a href="mailto:rubelpixel97@gmail.com">rubelpixel97@gmail.com</a><br>© Deshi Community
+</div></footer>
+
+<a class="fab wa" href="https://wa.me/393512463780" target="_blank" rel="noopener" aria-label="WhatsApp">💬</a>
+<button class="fab" id="fab" aria-label="খুঁজুন">🔍</button>
+
+<dialog id="dpost"><div class="dp">
+  <button class="x" data-close>✕</button><h2>নতুন বিজ্ঞাপন দিন</h2>
+  <label>আপনি কে?</label>
+  <select id="f-kind"><option value="employer">👔 মালিক / নিয়োগকর্তা</option><option value="seeker">🙋 কাজ খুঁজছি</option></select>
+  <label>ক্যাটাগরি</label><select id="f-cat"></select>
+  <label>শিরোনাম</label><input id="f-title" maxlength="80" placeholder="যেমন: অভিজ্ঞ ওয়েটার চাই">
+  <div class="row"><div><label>শহর</label><select id="f-city"></select></div><div><label>বেতন / ভাড়া / মূল্য</label><input id="f-price" maxlength="30" placeholder="£12/ঘণ্টা"></div></div>
+  <label>বিস্তারিত</label><textarea id="f-details" maxlength="600" placeholder="সময়, অভিজ্ঞতা, ঠিকানা ইত্যাদি"></textarea>
+  <label>যোগাযোগ (ফোন বা ইমেইল)</label><input id="f-contact" maxlength="80" placeholder="07xxx xxxxxx বা name@email.com">
+  <input class="hp" id="f-web" tabindex="-1" autocomplete="off" aria-hidden="true">
+  <p class="tags">⚠️ আপনার ফোন/ইমেইল সবাই দেখতে পাবে।</p>
+  <button class="btn g" id="f-submit">জমা দিন</button><div id="msg" role="status"></div>
+</div></dialog>
+
+<dialog id="ddet"><div class="dp"><button class="x" data-close>✕</button><div id="dbody"></div></div></dialog>
+
+<script>
+// ===== Supabase URL ও anon key এখানে বসান। ফাঁকা থাকলে ডেমো মোড চলবে =====
+const CFG = { url: "https://kxqxddbiazjtipjrfjxb.supabase.co", key: "sb_publishable_kMtL8012-HEyuVg9rZmMRw_c6C5ufM3" };
+// ===========================================================================
+const CATS = [["all","🏠","সব"],["job","💼","চাকরি"],["rent","🛏️","বাসা ভাড়া"],["business","🏪","ব্যবসা বিক্রি"],["service","🛠️","সেবা"],["legal","⚖️","আইন"],["event","🎉","ইভেন্ট"],["car","🚗","গাড়ি"],["market","🛍️","কেনাবেচা"]];
+const CITIES = ["London","Birmingham","Manchester","Oldham","Leicester","Bradford","Luton","Newcastle","Sunderland","Cardiff","Glasgow","অন্য শহর"];
+const demo = !CFG.url;
+let kind = "employer", cat = "all", ads = [], shown = 10;
+const $ = s => document.querySelector(s);
+const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+const bn = n => String(n).replace(/\d/g, d => "০১২৩৪৫৬৭৮৯"[d]);
+const cinfo = k => CATS.find(c => c[0] === k) || ["", "📌", k];
+const H = () => CFG.key.startsWith("sb_") ? { apikey: CFG.key } : { apikey: CFG.key, Authorization: "Bearer " + CFG.key };
+const ago = iso => { const d = Math.floor((Date.now() - new Date(iso)) / 864e5); return d < 1 ? "আজ" : d === 1 ? "গতকাল" : bn(d) + " দিন আগে"; };
+const day = n => new Date(Date.now() - n * 864e5).toISOString();
+
+const SAMPLES = [
+ {kind:"employer",category:"job",title:"অভিজ্ঞ ওয়েটার চাই, ইন্ডিয়ান রেস্টুরেন্ট",city:"London",price:"£12/ঘণ্টা",details:"ফুল-টাইম ওয়েটার প্রয়োজন। ইংরেজি জানা থাকলে ভালো।",pinned:true,created_at:day(0)},
+ {kind:"employer",category:"job",title:"টেকওয়েতে কিচেন হেল্পার দরকার",city:"Birmingham",price:"£11/ঘণ্টা",details:"সন্ধ্যার শিফট, সপ্তাহে ৫ দিন।",pinned:true,created_at:day(1)},
+ {kind:"employer",category:"rent",title:"ডাবল রুম ভাড়া হবে, সব বিল সহ",city:"Oldham",price:"£450/মাস",details:"শান্ত এলাকা, বাস স্টপ কাছে।",created_at:day(2)},
+ {kind:"employer",category:"business",title:"চালু টেকওয়ে ব্যবসা বিক্রি হবে",city:"London",price:"আলোচনা সাপেক্ষে",details:"ভালো লোকেশন, লম্বা লিজ।",created_at:day(3)},
+ {kind:"employer",category:"service",title:"ইমিগ্রেশন ও ট্যাক্স পরামর্শ",city:"Manchester",price:"",details:"অভিজ্ঞ পরামর্শদাতার সহায়তা।",created_at:day(4)},
+ {kind:"employer",category:"event",title:"কমিউনিটি মিলনমেলা",city:"Birmingham",price:"ফ্রি",details:"পরিবার নিয়ে আসুন, খাবার ও গানের আয়োজন।",created_at:day(5)},
+ {kind:"seeker",category:"job",title:"ড্রাইভার হিসেবে কাজ খুঁজছি",city:"Manchester",price:"",details:"UK লাইসেন্স আছে, ৩ বছরের অভিজ্ঞতা।",created_at:day(0)},
+ {kind:"seeker",category:"job",title:"ক্লিনিং কাজ খুঁজছি",city:"Leicester",price:"",details:"পার্ট-টাইম বা ফুল-টাইম।",created_at:day(2)},
+ {kind:"seeker",category:"job",title:"কিচেন হেল্পার হিসেবে কাজ খুঁজছি",city:"London",price:"",details:"রেস্টুরেন্টে কাজের অভিজ্ঞতা আছে।",created_at:day(3)}
+].map((a, i) => ({ ...a, id: "s" + i, sample: true, contact: "" }));
+
+async function load() {
+  if (demo) {
+    let saved = [];
+    try { saved = JSON.parse(localStorage.getItem("ads") || "[]"); } catch (e) {}
+    ads = [...saved, ...SAMPLES];
+  } else {
+    try {
+      const r = await fetch(CFG.url + "/rest/v1/ads?select=*&approved=eq.true&order=pinned.desc,created_at.desc&limit=300", { headers: H() });
+      ads = r.ok ? await r.json() : [];
+    } catch (e) { ads = []; }
+  }
+  render();
+}
+
+function links(v) {
+  v = (v || "").trim();
+  if (v.includes("@")) return [["✉️ ইমেইল", "mailto:" + encodeURIComponent(v)]];
+  let d = v.replace(/\D/g, "");
+  if (!d) return [];
+  if (d.startsWith("0")) d = "44" + d.slice(1);
+  return [["💬 WhatsApp", "https://wa.me/" + d], ["📞 ফোন", "tel:+" + d]];
+}
+
+function render() {
+  const q = $("#q").value.trim().toLowerCase(), city = $("#city").value;
+  const rows = ads.filter(a => a.kind === kind && (cat === "all" || a.category === cat) && (!city || a.city === city) &&
+    (!q || (a.title + " " + a.details).toLowerCase().includes(q)))
+    .sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || new Date(b.created_at) - new Date(a.created_at));
+  $("#cnt").textContent = bn(ads.length);
+  $("#rc").textContent = bn(rows.length) + "টি বিজ্ঞাপন";
+  const list = $("#list"); list.textContent = "";
+  if (!rows.length) list.append(el("p", "empty", "এখনও কোনো বিজ্ঞাপন নেই। প্রথমটি আপনিই দিন!"));
+  rows.slice(0, shown).forEach(a => {
+    const c = el("div", "ad"); c.tabIndex = 0; c.setAttribute("role", "button");
+    c.append(el("div", "av", cinfo(a.category)[1]));
+    const m = el("div", "m"); m.append(el("h3", "", a.title));
+    const t = el("div", "tags");
+    if (a.pinned) t.append(el("span", "pin", "📌 টপ"));
+    t.append(el("span", "tag", cinfo(a.category)[2]), el("span", "", "📍 " + a.city));
+    if (a.price) t.append(el("span", "price", a.price));
+    t.append(el("span", "ago", ago(a.created_at)));
+    m.append(t); c.append(m);
+    c.onclick = () => detail(a);
+    c.onkeydown = e => { if (e.key === "Enter") detail(a); };
+    list.append(c);
+  });
+  $("#more").hidden = rows.length <= shown;
+}
+
+function detail(a) {
+  const b = $("#dbody"); b.textContent = "";
+  b.append(el("h2", "", a.title));
+  const t = el("div", "tags");
+  if (a.pinned) t.append(el("span", "pin", "📌 টপ"));
+  t.append(el("span", "tag", cinfo(a.category)[2]), el("span", "", "📍 " + a.city), el("span", "", ago(a.created_at)));
+  if (a.price) t.append(el("span", "price", a.price));
+  b.append(t, el("div", "det", a.details || ""));
+  const l = el("div", "links");
+  if (a.sample) l.append(el("span", "tags", "এটি একটি নমুনা বিজ্ঞাপন।"));
+  links(a.contact).forEach(([x, h]) => { const k = el("a", "btn g", x); k.href = h; k.rel = "noopener"; if (h.startsWith("http")) k.target = "_blank"; l.append(k); });
+  if (navigator.share) { const s = el("button", "btn o", "শেয়ার"); s.onclick = () => navigator.share({ title: a.title, url: location.href }).catch(() => {}); l.append(s); }
+  b.append(l);
+  $("#ddet").showModal();
+}
+
+async function submit() {
+  const msg = $("#msg");
+  if ($("#f-web").value) return;
+  const ad = { kind: $("#f-kind").value, category: $("#f-cat").value, title: $("#f-title").value.trim(), city: $("#f-city").value, price: $("#f-price").value.trim(), details: $("#f-details").value.trim(), contact: $("#f-contact").value.trim() };
+  if (!ad.title || !ad.contact) { msg.style.color = "var(--red)"; msg.textContent = "শিরোনাম ও যোগাযোগ দিন।"; return; }
+  msg.style.color = "var(--green)";
+  if (demo) {
+    Object.assign(ad, { id: Date.now(), approved: true, created_at: new Date().toISOString() });
+    const saved = ads.filter(a => !a.sample); saved.unshift(ad);
+    try { localStorage.setItem("ads", JSON.stringify(saved)); } catch (e) {}
+    ads.unshift(ad); msg.textContent = "বিজ্ঞাপন যোগ হয়েছে।";
+  } else {
+    try {
+      const r = await fetch(CFG.url + "/rest/v1/ads", { method: "POST", headers: { ...H(), "Content-Type": "application/json", Prefer: "return=minimal" }, body: JSON.stringify({ ...ad, approved: false }) });
+      if (!r.ok) throw 0;
+      msg.textContent = "জমা হয়েছে। যাচাইয়ের পর প্রকাশ হবে।";
+    } catch (e) { msg.style.color = "var(--red)"; msg.textContent = "জমা দেওয়া যায়নি, আবার চেষ্টা করুন।"; return; }
+  }
+  ["title", "price", "details", "contact"].forEach(i => $("#f-" + i).value = "");
+  kind = ad.kind; setKind(kind); render();
+  setTimeout(() => { $("#dpost").close(); msg.textContent = ""; }, 1400);
+}
+
+function setKind(k) {
+  kind = k; shown = 10;
+  $("#t-employer").setAttribute("aria-selected", k === "employer");
+  $("#t-seeker").setAttribute("aria-selected", k === "seeker");
+  render();
+}
+
+// ---- init ----
+const cg = $("#cats");
+CATS.forEach(([k, i, n]) => {
+  const b = el("div", "cat" + (k === "all" ? " on" : "")); b.append(el("span", "", i), document.createTextNode(n));
+  b.onclick = () => { cat = k; shown = 10; cg.querySelectorAll(".cat").forEach(x => x.classList.remove("on")); b.classList.add("on"); render(); };
+  cg.append(b);
+});
+const opt = (s, v, t) => { const o = el("option", "", t); o.value = v; s.append(o); };
+opt($("#city"), "", "📍 সব শহর"); CITIES.forEach(c => { opt($("#city"), c, c); opt($("#f-city"), c, c); });
+CATS.slice(1).forEach(([k, i, n]) => opt($("#f-cat"), k, i + " " + n));
+$("#t-employer").onclick = () => setKind("employer");
+$("#t-seeker").onclick = () => setKind("seeker");
+$("#city").onchange = () => { shown = 10; render(); };
+$("#q").oninput = () => { shown = 10; render(); };
+$("#more").onclick = () => { shown += 10; render(); };
+$("#post").onclick = () => { $("#f-kind").value = kind; $("#dpost").showModal(); };
+$("#f-submit").onclick = submit;
+$("#fab").onclick = () => { scrollTo({ top: 0 }); $("#q").focus(); };
+document.querySelectorAll("[data-close]").forEach(b => b.onclick = () => b.closest("dialog").close());
+$("#demo").hidden = !demo;
+load();
+</script>
+</body>
+</html>
