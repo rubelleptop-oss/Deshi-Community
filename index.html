@@ -88,6 +88,7 @@ footer a{color:#fff}
 .fab{position:fixed;right:16px;bottom:calc(18px + env(safe-area-inset-bottom,0px));width:58px;height:58px;border-radius:50%;border:0;background:var(--orange);color:#fff;font-size:1.5rem;box-shadow:0 6px 18px #0004;cursor:pointer;z-index:6}
 .fab.wa{bottom:calc(88px + env(safe-area-inset-bottom,0px));background:#25d366;display:grid;place-items:center;text-decoration:none}
 a.banner{text-decoration:none}
+[hidden]{display:none!important}
 details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:8px}
 summary{font-weight:700;cursor:pointer}
 details p{margin:8px 0 0;color:var(--muted);font-size:.92rem}
@@ -129,7 +130,7 @@ textarea{min-height:90px;resize:vertical}
 </div>
 <div class="filters"><select id="city" aria-label="শহর"></select><span class="rc" id="rc"></span></div>
 
-<a class="banner" href="https://wa.me/393512463780" target="_blank" rel="noopener"><div><h3>আপনার ব্যবসার বিজ্ঞাপন এখানে</h3><p>হাজারো বাংলাদেশির কাছে পৌঁছান। WhatsApp-এ যোগাযোগ করুন।</p></div><div class="big">📣</div></a>
+<a class="banner" href="#" id="bn" role="button"><div><h3>আপনার ব্যবসার বিজ্ঞাপন এখানে</h3><p>হাজারো বাংলাদেশির কাছে পৌঁছান। এখানে চাপ দিয়ে বিজ্ঞাপন দিন।</p></div><div class="big">📣</div></a>
 
 <div id="list"></div>
 <button class="btn o more" id="more" hidden>আরও দেখুন</button>
@@ -172,11 +173,12 @@ textarea{min-height:90px;resize:vertical}
 
 <dialog id="dpost"><div class="dp">
   <button class="x" data-close>✕</button><h2>নতুন বিজ্ঞাপন দিন</h2>
-  <label>আপনি কে?</label>
-  <select id="f-kind"><option value="employer">👔 মালিক / নিয়োগকর্তা</option><option value="seeker">🙋 কাজ খুঁজছি</option></select>
   <label>ক্যাটাগরি</label><select id="f-cat"></select>
-  <label>শিরোনাম</label><input id="f-title" maxlength="80" placeholder="যেমন: অভিজ্ঞ ওয়েটার চাই">
-  <div class="row"><div><label>শহর</label><select id="f-city"></select></div><div><label>বেতন / ভাড়া / মূল্য</label><input id="f-price" maxlength="30" placeholder="£12/ঘণ্টা"></div></div>
+  <label>আপনি কে?</label><select id="f-kind"></select>
+  <div id="f-extra"></div>
+  <p class="tags" id="f-warn" hidden></p>
+  <label>শিরোনাম</label><input id="f-title" maxlength="80" placeholder="সংক্ষেপে বিজ্ঞাপনের শিরোনাম">
+  <div class="row"><div><label>শহর</label><select id="f-city"></select></div><div><label id="l-price">মূল্য</label><input id="f-price" maxlength="30" placeholder="£12/ঘণ্টা"></div></div>
   <label>বিস্তারিত</label><textarea id="f-details" maxlength="600" placeholder="সময়, অভিজ্ঞতা, ঠিকানা ইত্যাদি"></textarea>
   <label>যোগাযোগ (ফোন বা ইমেইল)</label><input id="f-contact" maxlength="80" placeholder="07xxx xxxxxx বা name@email.com">
   <input class="hp" id="f-web" tabindex="-1" autocomplete="off" aria-hidden="true">
@@ -213,6 +215,51 @@ const SAMPLES = [
  {kind:"seeker",category:"job",title:"ক্লিনিং কাজ খুঁজছি",city:"Leicester",price:"",details:"পার্ট-টাইম বা ফুল-টাইম।",created_at:day(2)},
  {kind:"seeker",category:"job",title:"কিচেন হেল্পার হিসেবে কাজ খুঁজছি",city:"London",price:"",details:"রেস্টুরেন্টে কাজের অভিজ্ঞতা আছে।",created_at:day(3)}
 ].map((a, i) => ({ ...a, id: "s" + i, sample: true, contact: "" }));
+
+
+const ROOM = ["সিঙ্গেল রুম","ডাবল রুম","ফ্ল্যাট","পুরো বাড়ি"], LEGAL = ["ইমিগ্রেশন","পরিবার আইন","হাউজিং / ভাড়াটিয়া","ট্যাক্স / হিসাব","অন্যান্য"], BIZ = ["রেস্টুরেন্ট","টেকওয়ে","গ্রোসারি / দোকান","অন্যান্য"], COND = ["নতুন","ব্যবহৃত, ভালো","ব্যবহৃত"];
+// ক্যাটাগরি অনুযায়ী আলাদা ফর্ম: [নাম, ধরন, বিকল্প/উদাহরণ, বাধ্যতামূলক?]
+const FORMS = {
+ job: { kinds: ["👔 মালিক / নিয়োগকর্তা","🙋 কাজ খুঁজছেন"], price: ["বেতন (যেমন £12/ঘণ্টা)","প্রত্যাশিত বেতন (ঐচ্ছিক)"],
+  employer: [["কাজের ধরন","select",["রেস্টুরেন্ট / টেকওয়ে","দোকান / গ্রোসারি","ক্লিনিং","ডেলিভারি / ড্রাইভিং","অফিস","অন্যান্য"]],["সময়","select",["ফুল-টাইম","পার্ট-টাইম","ওয়েকএন্ড"]],["কতজন লাগবে","text","১"]],
+  seeker: [["কী কাজ পারেন","text","যেমন ওয়েটার, ড্রাইভার",1],["অভিজ্ঞতা","text","যেমন ২ বছর"],["কবে থেকে শুরু করতে পারবেন","text","যেমন এখনই"]] },
+ rent: { kinds: ["🏠 ভাড়া দিচ্ছি","🔍 ভাড়া খুঁজছি"], price: ["মাসিক ভাড়া (যেমন £450)","মাসিক বাজেট"],
+  employer: [["ধরন","select",ROOM],["বিল সহ?","select",["হ্যাঁ","না"]],["ডিপোজিট","text","যেমন £450"],["কবে থেকে খালি","text","যেমন ১ নভেম্বর"]],
+  seeker: [["কী ধরনের জায়গা","select",ROOM],["কতজন থাকবেন","text","১"],["কবে থেকে লাগবে","text",""],["পছন্দের এলাকা","text",""]] },
+ market: { kinds: ["🏷️ বিক্রি করছি","🛒 কিনতে চাই"], price: ["মূল্য (যেমন £50)","সর্বোচ্চ বাজেট"],
+  employer: [["জিনিসের নাম","text","",1],["অবস্থা","select",COND],["দরদাম হবে?","select",["হ্যাঁ","না"]]],
+  seeker: [["কী কিনতে চান","text","",1],["অবস্থা","select",["যেকোনো",...COND]]] },
+ legal: { kinds: ["⚖️ সেবা দিচ্ছি","🙋 সহায়তা চাই"], price: ["ফি (ঐচ্ছিক)","বাজেট (ঐচ্ছিক)"], warn: "⚠️ ইমিগ্রেশন পরামর্শ দিতে OISC বা SRA রেজিস্ট্রেশন লাগে। নিবন্ধন ছাড়া পরামর্শ দেওয়া যুক্তরাজ্যে অপরাধ।",
+  employer: [["সেবার ধরন","select",LEGAL],["OISC / SRA রেজিস্ট্রেশন নম্বর","text","বাধ্যতামূলক",1],["ভাষা","text","বাংলা, ইংরেজি"]],
+  seeker: [["কী বিষয়ে সহায়তা","select",LEGAL],["ভাষা","text","বাংলা"]] },
+ business: { kinds: ["🏪 ব্যবসা বিক্রি করছি","🔍 ব্যবসা কিনতে চাই"], price: ["চাওয়া দাম","বাজেট"],
+  employer: [["ব্যবসার ধরন","select",BIZ],["লিজের মেয়াদ","text","যেমন ১০ বছর"],["বিক্রির কারণ","text",""]],
+  seeker: [["কী ধরনের ব্যবসা","select",BIZ],["পছন্দের এলাকা","text",""]] },
+ service: { kinds: ["🛠️ সেবা দিচ্ছি","🙋 সেবা চাই"], price: ["চার্জ (ঐচ্ছিক)","বাজেট (ঐচ্ছিক)"],
+  employer: [["সেবার ধরন","text","যেমন ইলেকট্রিশিয়ান, ট্যাক্সি",1],["কোন এলাকায় সেবা","text",""],["অভিজ্ঞতা","text",""]],
+  seeker: [["কী সেবা দরকার","text","",1],["কবে লাগবে","text",""]] },
+ event: { kinds: ["🎉 আয়োজন করছি","🙋 অংশ নিতে / সাহায্য করতে চাই"], price: ["টিকিট / ফি (ফ্রি হলে ফ্রি লিখুন)","বাজেট (ঐচ্ছিক)"],
+  employer: [["তারিখ ও সময়","text","যেমন ১৫ নভেম্বর, বিকাল ৪টা",1],["স্থান","text",""],["কাদের জন্য","text","যেমন পরিবার, সবাই"]],
+  seeker: [["কী ধরনের ইভেন্ট","text",""],["কবে","text",""]] },
+ car: { kinds: ["🚗 বিক্রি করছি","🔍 কিনতে চাই"], price: ["চাওয়া দাম","সর্বোচ্চ বাজেট"],
+  employer: [["গাড়ির মডেল","text","যেমন Toyota Prius",1],["সাল","text","যেমন ২০১৮"],["মাইলেজ","text",""],["MOT আছে?","select",["হ্যাঁ","না"]]],
+  seeker: [["কী ধরনের গাড়ি","text","",1],["সর্বোচ্চ মাইলেজ","text",""]] }
+};
+function tabLabels() { const F = FORMS[cat]; $("#t-employer").textContent = F ? F.kinds[0] : "👔 মালিক / নিয়োগকর্তা"; $("#t-seeker").textContent = F ? F.kinds[1] : "🙋 কাজ খুঁজছেন"; }
+function fillKinds() {
+  const F = FORMS[$("#f-cat").value], ks = $("#f-kind"), cur = ks.value || "employer";
+  ks.textContent = ""; opt(ks, "employer", F.kinds[0]); opt(ks, "seeker", F.kinds[1]); ks.value = cur; buildExtra();
+}
+function buildExtra() {
+  const F = FORMS[$("#f-cat").value], k = $("#f-kind").value, box = $("#f-extra");
+  box.textContent = ""; $("#l-price").textContent = F.price[k === "seeker" ? 1 : 0];
+  F[k].forEach(([l, t, o, r], i) => {
+    const inp = t === "select" ? el("select") : el("input"); inp.id = "x" + i;
+    if (t === "select") o.forEach(x => opt(inp, x, x)); else { inp.placeholder = o || ""; inp.maxLength = 80; }
+    box.append(el("label", "", l + (r ? " *" : "")), inp);
+  });
+  $("#f-warn").hidden = !(F.warn && k === "employer");
+}
 
 async function load() {
   if (demo) {
@@ -282,8 +329,11 @@ function detail(a) {
 async function submit() {
   const msg = $("#msg");
   if ($("#f-web").value) return;
-  const ad = { kind: $("#f-kind").value, category: $("#f-cat").value, title: $("#f-title").value.trim(), city: $("#f-city").value, price: $("#f-price").value.trim(), details: $("#f-details").value.trim(), contact: $("#f-contact").value.trim() };
-  if (!ad.title || !ad.contact) { msg.style.color = "var(--red)"; msg.textContent = "শিরোনাম ও যোগাযোগ দিন।"; return; }
+  const F = FORMS[$("#f-cat").value], k = $("#f-kind").value;
+  const ex = F[k].map(([l, t, o, r], i) => [l, ($("#x" + i).value || "").trim(), r]);
+  const ad = { kind: k, category: $("#f-cat").value, title: $("#f-title").value.trim(), city: $("#f-city").value, price: $("#f-price").value.trim(), contact: $("#f-contact").value.trim(),
+    details: [ex.filter(x => x[1]).map(x => x[0] + ": " + x[1]).join("\n"), $("#f-details").value.trim()].filter(Boolean).join("\n\n") };
+  if (!ad.title || !ad.contact || ex.some(x => x[2] && !x[1])) { msg.style.color = "var(--red)"; msg.textContent = "তারকা (*) চিহ্নিত ঘর, শিরোনাম ও যোগাযোগ দিন।"; return; }
   msg.style.color = "var(--green)";
   if (demo) {
     Object.assign(ad, { id: Date.now(), approved: true, created_at: new Date().toISOString() });
@@ -297,7 +347,7 @@ async function submit() {
       msg.textContent = "জমা হয়েছে। যাচাইয়ের পর প্রকাশ হবে।";
     } catch (e) { msg.style.color = "var(--red)"; msg.textContent = "জমা দেওয়া যায়নি, আবার চেষ্টা করুন।"; return; }
   }
-  ["title", "price", "details", "contact"].forEach(i => $("#f-" + i).value = "");
+  ["title", "price", "details", "contact"].forEach(i => $("#f-" + i).value = ""); buildExtra();
   kind = ad.kind; setKind(kind); render();
   setTimeout(() => { $("#dpost").close(); msg.textContent = ""; }, 1400);
 }
@@ -313,19 +363,21 @@ function setKind(k) {
 const cg = $("#cats");
 CATS.forEach(([k, i, n]) => {
   const b = el("div", "cat" + (k === "all" ? " on" : "")); b.append(el("span", "", i), document.createTextNode(n));
-  b.onclick = () => { cat = k; shown = 10; cg.querySelectorAll(".cat").forEach(x => x.classList.remove("on")); b.classList.add("on"); render(); };
+  b.onclick = () => { cat = k; shown = 10; cg.querySelectorAll(".cat").forEach(x => x.classList.remove("on")); b.classList.add("on"); tabLabels(); render(); };
   cg.append(b);
 });
 const opt = (s, v, t) => { const o = el("option", "", t); o.value = v; s.append(o); };
 opt($("#city"), "", "📍 সব শহর"); CITIES.forEach(c => { opt($("#city"), c, c); opt($("#f-city"), c, c); });
 CATS.slice(1).forEach(([k, i, n]) => opt($("#f-cat"), k, i + " " + n));
+$("#f-cat").onchange = fillKinds; $("#f-kind").onchange = buildExtra; fillKinds();
 $("#t-employer").onclick = () => setKind("employer");
 $("#t-seeker").onclick = () => setKind("seeker");
 $("#city").onchange = () => { shown = 10; render(); };
 $("#q").oninput = () => { shown = 10; render(); };
 $("#more").onclick = () => { shown += 10; render(); };
-$("#post").onclick = () => { $("#f-kind").value = kind; $("#dpost").showModal(); };
+$("#post").onclick = () => { if (cat !== "all") $("#f-cat").value = cat; fillKinds(); $("#f-kind").value = kind; buildExtra(); $("#dpost").showModal(); };
 $("#f-submit").onclick = submit;
+$("#bn").onclick = e => { e.preventDefault(); $("#post").click(); };
 $("#fab").onclick = () => { scrollTo({ top: 0 }); $("#q").focus(); };
 document.querySelectorAll("[data-close]").forEach(b => b.onclick = () => b.closest("dialog").close());
 $("#demo").hidden = !demo;
